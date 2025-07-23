@@ -208,7 +208,7 @@ export async function addToCart(asin: string): Promise<{ success: boolean; messa
       // Check for success message
       const confirmationText = await page.$eval('#sw-atc-confirmation', el => el.textContent || '')
 
-      if (!confirmationText.includes('Added to basket')) {
+      if (!confirmationText.includes('Added to cart') && !confirmationText.includes('Added to basket')) {
         throw new Error(`Unexpected confirmation message: ${confirmationText}`)
       }
 
