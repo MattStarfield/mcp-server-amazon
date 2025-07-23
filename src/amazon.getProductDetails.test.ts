@@ -1,4 +1,4 @@
-import { getProductDetails } from './amazon.js'
+import { getProductDetails } from './products.js'
 
 async function testGetProductDetails_regular() {
   console.log('\n\n--------------------------------------')

@@ -1,7 +1,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
-import { getOrdersHistory, getCartContent, addToCart, getProductDetails, searchProducts, clearCart } from './amazon.js'
+import { getOrdersHistory } from './orders.js'
+import { getCartContent, addToCart, clearCart } from './cart.js'
+import { getProductDetails, searchProducts } from './products.js'
 
 // Create server instance
 const server = new McpServer({

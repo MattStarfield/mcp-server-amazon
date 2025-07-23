@@ -1,4 +1,4 @@
-import { addToCart } from './amazon.js'
+import { addToCart } from './cart.js'
 import { USE_MOCKS } from './config.js'
 
 async function testAddToCart() {
