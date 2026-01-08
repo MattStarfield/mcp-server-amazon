@@ -1,176 +1,152 @@
-# Amazon MCP Server (Customized Fork)
+# Amazon MCP Server (MattStarfield Fork)
 
-This is a customized fork of [rigwild/mcp-server-amazon](https://github.com/rigwild/mcp-server-amazon) with enhanced features for multi-profile support, session confirmation gates, and ARM64 (Raspberry Pi) compatibility.
+> **This is a customized fork** of [rigwild/mcp-server-amazon](https://github.com/rigwild/mcp-server-amazon) with significant enhancements for multi-account management, safety features, and ARM64 compatibility.
 
-This server allows you to interact with Amazon's services using the MCP (Model Context Protocol) framework. This lets you use your Amazon account through ChatGPT or Claude AI interfaces.
+[![Fork](https://img.shields.io/badge/fork-MattStarfield-blue)](https://github.com/MattStarfield/mcp-server-amazon)
+[![Original](https://img.shields.io/badge/original-rigwild-green)](https://github.com/rigwild/mcp-server-amazon)
+[![License](https://img.shields.io/badge/license-MIT-yellow)](./LICENSE)
 
-## Fork Customizations
+---
 
-This fork extends the original server with the following enhancements:
+## What's Different in This Fork?
+
+This fork adds **enterprise-grade multi-account management** with safety guardrails, making it suitable for users who manage multiple Amazon accounts (personal, work, business, etc.).
+
+### Key Enhancements
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-Profile Support** | Manage multiple Amazon accounts (personal, work, etc.) with runtime switching |
-| **Session Confirmation Gate** | Safety feature requiring explicit profile confirmation before account-specific operations |
-| **Per-Profile Confirmation** | Switching profiles resets confirmation, preventing accidental operations on wrong account |
-| **AskUserQuestion Modal** | Returns structured JSON for Claude Code's modal UI instead of text prompts |
-| **ARM64 Compatibility** | Uses system Chromium for Raspberry Pi and other ARM64 systems |
-| **Cookie Type Normalization** | Handles edge cases in browser-exported cookies (sameSite, null values) |
+| **Multi-Profile Support** | Switch between multiple Amazon accounts at runtime without restarting |
+| **Session Confirmation Gate** | Prevents accidental operations on the wrong account with explicit confirmation |
+| **Per-Profile Confirmation Reset** | Switching profiles requires re-confirmation - no silent account changes |
+| **Claude Code Modal UI** | Interactive clickable modal instead of text prompts for profile selection |
+| **ARM64/Raspberry Pi Support** | Native compatibility with Raspberry Pi and other ARM64 systems |
+| **Cookie Normalization** | Robust handling of browser-exported cookies with edge case fixes |
 
-### Original Repository
+### New MCP Tools (5 Added)
 
-- **Author**: [rigwild](https://github.com/rigwild)
-- **Repository**: [rigwild/mcp-server-amazon](https://github.com/rigwild/mcp-server-amazon)
-- **License**: MIT
+| Tool | Description |
+|------|-------------|
+| `list-profiles` | View all configured Amazon account profiles |
+| `get-current-profile` | Check which profile is currently active |
+| `switch-profile` | Switch to a different Amazon account |
+| `save-profile` | Save new account cookies to a named profile |
+| `confirm-profile` | Explicitly confirm profile before sensitive operations |
 
-### Files Added/Modified
+### Files Changed from Original
 
-| File | Status | Description |
-|------|--------|-------------|
-| `src/profileManager.ts` | **NEW** | Profile management with session confirmation logic |
-| `src/config.ts` | Modified | Refactored to use ProfileManager for dynamic cookie loading |
-| `src/utils.ts` | Modified | ARM64 Chromium support, dynamic cookie injection |
-| `src/index.ts` | Modified | Added 5 new MCP tools, confirmation gates on account-specific tools |
-| `profiles/` | **NEW** | Directory for profile JSON files |
+| File | Change | Purpose |
+|------|--------|---------|
+| `src/profileManager.ts` | **NEW** | Core multi-profile and confirmation logic |
+| `src/index.ts` | **Major** | 5 new tools + confirmation gates on account operations |
+| `src/config.ts` | **Refactored** | Dynamic cookie loading from active profile |
+| `src/utils.ts` | **Modified** | ARM64 Chromium support + dynamic cookies |
+| `profiles/` | **NEW** | Directory for account profile JSON files |
 
-## Features
+---
 
-- **Product search**: Search for products on Amazon
-- **Product details**: Retrieve detailed information about a specific product on Amazon
-- **Cart management**: Add items or clear your Amazon cart
-- **Ordering**: Place orders (fake for demonstration purposes)
-- **Orders history**: Retrieve your recent Amazon orders details
-- **Multi-Profile Support**: Manage multiple Amazon accounts (personal, work, etc.) with runtime switching
-- **Session Confirmation**: Safety gate requiring profile confirmation before account-specific operations
+## Quick Start
 
-## Demo
-
-Simple demo, showcasing a quick product search and purchase.
-
-![Demo GIF video](./demo.gif)
-
-## Full Demo
-
-Another more complex demo with products search, leveraging Claude AI recommendations to compare and make a decision, then purchase.
-
-It showcases how natural and powerful the Amazon MCP integration could be inside a conversation
-
-Video: https://www.youtube.com/watch?v=xas2CLkJDYg
-
-## Install
-
-Install dependencies
+### Installation
 
 ```sh
+# Clone this fork
+git clone https://github.com/MattStarfield/mcp-server-amazon.git
+cd mcp-server-amazon
+
+# Install dependencies
 npm install -D
-```
 
-Build the project
-
-```sh
+# Build
 npm run build
 ```
 
-## Claude Desktop Integration
+### ARM64 Systems (Raspberry Pi)
 
-Create or update `~/Library/Application Support/Claude/claude_desktop_config.json` with the path to the MCP server.
+```sh
+# Install system Chromium (required for ARM64)
+sudo apt install chromium
+```
+
+### Claude Code Configuration
+
+Add to your `~/.claude.json`:
 
 ```json
 {
   "mcpServers": {
-    "amazon": {
+    "amazon-shopping": {
       "command": "node",
-      "args": ["/Users/admin/dev/mcp-server-amazon/build/index.js"]
+      "args": ["/path/to/mcp-server-amazon/build/index.js"]
     }
   }
 }
 ```
 
-Restart the Claude Desktop app to apply the changes. You should now see the Amazon MCP server listed in the Claude Desktop app.
+---
 
-|                                  |                                    |
-| :------------------------------: | :--------------------------------: |
-| ![screenshot](./screenshot.webp) | ![screenshot2](./screenshot2.webp) |
+## Multi-Profile System
 
-## Multi-Profile Setup
+The standout feature of this fork is **multi-profile support** - manage multiple Amazon accounts seamlessly.
 
-The server supports multiple Amazon account profiles, allowing you to switch between personal and work accounts without restarting.
+### Why Multi-Profile?
 
-### Profile Directory Structure
+- **Separate personal and work purchases** - Never accidentally buy on the wrong account
+- **Manage multiple regions** - amazon.com, amazon.co.uk, amazon.de, etc.
+- **Family accounts** - Keep household accounts organized
+- **Business accounts** - Separate business purchasing from personal
 
-Profiles are stored in the `profiles/` directory:
+### Setting Up Profiles
+
+#### 1. Export Cookies from Your Browser
+
+1. Log into your Amazon account in your browser
+2. Install a cookie editor extension (e.g., "Cookie-Editor" for Chrome/Firefox)
+3. Export all cookies for amazon.com as JSON
+
+#### 2. Save Profile via Claude
+
+```
+"Save these cookies as my work profile: [paste JSON]"
+```
+
+Or manually create `profiles/work.json` with exported cookies.
+
+#### 3. Directory Structure
 
 ```
 mcp-server-amazon/
 ├── profiles/
-│   ├── personal.json    # Your personal Amazon account cookies
-│   └── work.json        # Your work Amazon account cookies
+│   ├── personal.json    # Your personal Amazon cookies
+│   ├── work.json        # Work account cookies
+│   └── uk.json          # Amazon UK account (optional)
+├── src/
 └── ...
 ```
 
-### Setting Up Profiles
-
-1. **Export cookies from your browser** using a cookie editor extension (like "Cookie-Editor")
-2. **Save cookies to a profile** by telling Claude:
-   ```
-   "Save these as my work profile: [paste JSON cookies]"
-   ```
-   Or manually create `profiles/work.json` with your exported cookies.
-
 ### Switching Profiles
 
-Use natural language to switch between profiles:
-- "Switch to my work Amazon account"
-- "Use my personal profile"
-- "List my Amazon profiles"
+Use natural language:
 
-### Profile Management Tools
+- *"Switch to my work Amazon account"*
+- *"Use my personal profile"*
+- *"List my Amazon profiles"*
 
-| Tool | Description |
-|------|-------------|
-| `list-profiles` | Shows all available profiles and which is active |
-| `get-current-profile` | Returns the currently active profile name |
-| `switch-profile` | Switches to a different profile |
-| `save-profile` | Saves cookies to a named profile |
-| `confirm-profile` | Confirms the profile for session operations |
+---
 
-### Session Confirmation
+## Session Confirmation Gate
 
-For safety, account-specific operations (cart, orders, purchases) require profile confirmation at the start of each session. This prevents accidentally operating on the wrong account.
+This fork implements a **safety gate** that prevents accidental operations on the wrong account.
 
-**Tools requiring confirmation:**
-- `get-cart-content`
-- `add-to-cart`
-- `clear-cart`
-- `get-orders-history`
-- `perform-purchase`
+### How It Works
 
-**Tools NOT requiring confirmation (public data):**
-- `search-products`
-- `get-product-details`
+1. **First account-specific operation** triggers confirmation
+2. **Claude Code displays a modal** with profile options
+3. **User clicks to confirm** which account to use
+4. **Subsequent operations proceed** without re-prompting
+5. **Switching profiles resets confirmation** - must confirm again
 
-**Profile management tools (no confirmation needed):**
-- `list-profiles`
-- `get-current-profile`
-- `switch-profile`
-- `save-profile`
-- `confirm-profile`
-
-### Claude Code Modal Integration
-
-When confirmation is needed, the server returns structured JSON that Claude Code recognizes and presents as an interactive modal:
-
-```json
-{
-  "type": "AMAZON_PROFILE_CONFIRMATION_REQUIRED",
-  "currentProfile": "personal",
-  "availableProfiles": ["personal", "work"],
-  "question": "Which Amazon account should be used for this operation?",
-  "options": [...]
-}
-```
-
-Claude Code displays this as a clickable modal:
+### Visual Modal (Claude Code)
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -187,49 +163,172 @@ Claude Code displays this as a clickable modal:
 └─────────────────────────────────────────────────┘
 ```
 
-### Example Workflow
+### Operations Requiring Confirmation
+
+These account-specific operations require confirmation:
+
+- `add-to-cart` - Adding items to cart
+- `get-cart-content` - Viewing cart contents
+- `clear-cart` - Emptying the cart
+- `get-orders-history` - Viewing order history
+- `perform-purchase` - Completing purchases
+
+### Operations NOT Requiring Confirmation
+
+These public/read-only operations work without confirmation:
+
+- `search-products` - Searching Amazon catalog
+- `get-product-details` - Viewing product information
+
+---
+
+## Example Workflow
 
 ```
-User: "Add this iPhone to my cart"
-Claude: [Displays modal with profile options]
+User: "Find me a USB-C cable under $20"
 
-User: [Clicks "work" option and submits]
-Claude: "✅ Session confirmed for profile 'work'. You can now perform account-specific operations."
-        "✅ Product added to cart (Profile: work)"
+Claude: [Searches Amazon - no confirmation needed]
+        "I found several options. Here are the top 3..."
+
+User: "Add the first one to my cart"
+
+Claude: [Modal appears]
+        "Which Amazon account should be used?"
+
+User: [Clicks "personal (current)" → Submit]
+
+Claude: "✅ Session confirmed for profile 'personal'"
+        "✅ USB-C cable added to cart"
+
+User: "Actually, add it to my work account instead"
+
+Claude: [Switches profile, confirmation resets]
+        [Modal appears again for work profile]
+
+User: [Clicks "work" → Submit]
+
+Claude: "✅ Session confirmed for profile 'work'"
+        "✅ USB-C cable added to work cart"
 ```
 
-## Raspberry Pi / ARM64 Support
+---
 
-For ARM64 systems (like Raspberry Pi), the server is configured to use the system Chromium browser instead of Puppeteer's bundled Chrome. Ensure Chromium is installed:
+## All Available Tools
+
+### Profile Management (No Confirmation)
+
+| Tool | Description |
+|------|-------------|
+| `list-profiles` | Shows all profiles with cookie counts and active status |
+| `get-current-profile` | Returns current profile name and confirmation status |
+| `switch-profile` | Switches to named profile (resets confirmation) |
+| `save-profile` | Saves cookie JSON to a new or existing profile |
+| `confirm-profile` | Explicitly confirms current or specified profile |
+
+### Product Discovery (No Confirmation)
+
+| Tool | Description |
+|------|-------------|
+| `search-products` | Search Amazon catalog by keyword |
+| `get-product-details` | Get detailed product info by ASIN |
+
+### Account Operations (Confirmation Required)
+
+| Tool | Description |
+|------|-------------|
+| `get-cart-content` | View current cart items and totals |
+| `add-to-cart` | Add product to cart by ASIN |
+| `clear-cart` | Remove all items from cart |
+| `get-orders-history` | View recent order history |
+| `perform-purchase` | Complete checkout (demo mode) |
+
+---
+
+## ARM64 / Raspberry Pi Support
+
+This fork includes native ARM64 support, tested on Raspberry Pi 5.
+
+### The Problem
+
+Puppeteer downloads x86-64 Chrome binaries by default, which fail on ARM64.
+
+### The Solution
+
+This fork automatically uses system Chromium on ARM64:
+
+```typescript
+executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium'
+```
+
+### Setup
 
 ```sh
+# Install system Chromium
 sudo apt install chromium
+
+# Verify installation
+which chromium  # Should show /usr/bin/chromium
 ```
 
-The server will automatically use `/usr/bin/chromium` on ARM64 systems.
+---
 
 ## Troubleshooting
 
-The MCP server logs its output to a file. If you encounter any issues, you can check the log file for more information.
+### "Profile confirmation required"
 
-See `~/Library/Logs/Claude/mcp-server-amazon.log`
+This is expected behavior! The safety gate is working. Simply:
+- Click your profile choice in the modal, or
+- Say "confirm" or "confirm personal profile"
 
-### Common Issues
+### Profile not found
 
-**"Profile confirmation required" message:**
-- This is expected behavior for account-specific operations
-- Say "confirm" or "confirm profile" to proceed
-- You can also specify a profile: "confirm work profile"
-
-**Profile not found:**
-- Check that the profile JSON file exists in `profiles/`
-- Profile names must be lowercase alphanumeric with hyphens only
+- Check `profiles/` directory contains your JSON file
+- Profile names must be lowercase alphanumeric with hyphens (e.g., `work`, `amazon-uk`)
 - Run `list-profiles` to see available profiles
 
-**Browser launch errors on ARM64:**
-- Ensure system Chromium is installed: `sudo apt install chromium`
-- The server automatically uses `/usr/bin/chromium` on ARM64
+### Browser launch errors on ARM64
+
+```sh
+# Ensure Chromium is installed
+sudo apt install chromium
+
+# Test it works
+chromium --version
+```
+
+### Cookie issues
+
+- Re-export cookies if they've expired
+- Ensure you're exporting ALL cookies for the Amazon domain
+- Check for special characters in cookie values
+
+---
+
+## Original Project
+
+This fork is based on [rigwild/mcp-server-amazon](https://github.com/rigwild/mcp-server-amazon).
+
+**Original features preserved:**
+- Product search and details
+- Cart management
+- Order history
+- Purchase flow (demo)
+
+**Original demos** (from upstream):
+
+- Quick demo: ![Demo GIF](./demo.gif)
+- Full video: [YouTube Demo](https://www.youtube.com/watch?v=xas2CLkJDYg)
+
+---
 
 ## License
 
-[The MIT license](./LICENSE)
+[MIT License](./LICENSE) - Same as original project.
+
+---
+
+## Contributing
+
+Issues and PRs welcome! This fork is actively maintained.
+
+**Maintainer**: [MattStarfield](https://github.com/MattStarfield)
