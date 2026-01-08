@@ -218,3 +218,5 @@ amazonCookies.json
 mocks/*_202*.html
 mocks/*_202*.txt
 !mcp-server-amazon.log
+# Profile cookies (sensitive authentication data)
+profiles/*.json

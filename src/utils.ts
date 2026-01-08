@@ -1,6 +1,6 @@
 import fs from 'fs'
 import puppeteer from 'puppeteer'
-import { COOKIES_FILE_PATH, AMAZON_COOKIES, IS_BROWSER_VISIBLE } from './config.js'
+import { IS_BROWSER_VISIBLE, getAmazonCookies } from './config.js'
 
 /** Get the current timestamp like "2024-06-06_15-30-45" */
 export function getTimestamp() {
@@ -11,39 +11,23 @@ export function getTimestamp() {
   )}`
 }
 
-export function loadAmazonCookiesFile() {
-  if (fs.existsSync(COOKIES_FILE_PATH)) {
-    try {
-      const json = JSON.parse(fs.readFileSync(COOKIES_FILE_PATH, 'utf-8'))
-      console.error('[INFO] Loaded Amazon cookies from file')
-      return json.map((cookie: any) => ({
-        ...cookie,
-        // Ensure sameSite is set to a valid value
-        sameSite: cookie.sameSite || 'Lax',
-      }))
-    } catch (error: any) {
-      throw new Error(`Error reading or parsing amazonCookies.json: ${error.message}`)
-    }
-  } else {
-    throw new Error(
-      `No amazonCookies.json file found at ${COOKIES_FILE_PATH}. Please create it by logging into Amazon and exporting your cookies.`
-    )
-  }
-}
-
 export async function createBrowserAndPage(): Promise<{ browser: puppeteer.Browser; page: puppeteer.Page }> {
-  // Launch Puppeteer
+  // Launch Puppeteer with system Chromium (required for ARM64/Raspberry Pi)
   const browser = await puppeteer.launch({
     headless: !IS_BROWSER_VISIBLE,
     devtools: false,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security', '--disable-blink-features=AutomationControlled'],
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security', '--disable-blink-features=AutomationControlled', '--disable-gpu'],
     ignoreDefaultArgs: ['--enable-automation'],
     defaultViewport: null,
   })
 
+  // Get cookies from current profile (dynamic)
+  const cookies = getAmazonCookies()
+
   // Set cookies if available
-  if (AMAZON_COOKIES?.length > 0) {
-    await browser.setCookie(...AMAZON_COOKIES)
+  if (cookies?.length > 0) {
+    await browser.setCookie(...cookies)
     console.error('[INFO] Set Amazon cookies in the browser')
   } else {
     console.error('[WARN] No Amazon cookies found, proceeding without them')
